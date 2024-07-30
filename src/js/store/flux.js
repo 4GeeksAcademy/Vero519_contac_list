@@ -1,6 +1,8 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
+			apiUrl: "https://playground.4geeks.com/contact",
+			agenda_slug:"Vero519",
 			demo: [
 				{
 					title: "FIRST",
@@ -12,7 +14,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 					background: "white",
 					initial: "white"
 				}
-			]
+			],
+			contacts: []
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
@@ -37,7 +40,33 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				//reset the global store
 				setStore({ demo: demo });
-			}
+			},
+			createAgenda: ()=> {
+				const store = getStore()
+				fetch(`${store.apiUrl}/agenda/${store.agenda_slug}`, {method: "POST"})
+					.then(response => response.json())
+					.then(data => console.log(data))
+					.catch(error => console.log(error))
+			},
+			getContacts: ()=> {
+				const store = getStore()
+				const actions = getActions()
+				fetch(`${store.apiUrl}/agenda/${store.agenda_slug}/contacts`)
+					.then(response => {
+						if(response.status == 404){ 
+							actions.createAgenda()
+							return null
+						}
+						return response.json()
+					})
+					.then(data => {
+						if (data){
+							console.log(data)
+							setStore({contacts: data.contacts})
+						}
+					})
+					.catch(error => console.log(error))
+			},
 		}
 	};
 };
